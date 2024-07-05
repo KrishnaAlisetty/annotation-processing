@@ -53,9 +53,8 @@ public class BuilderProcessor extends AbstractProcessor {
         String builderName = className + "Builder";
         String builderFullName = packageName + "." + builderName;
         List<? extends Element> fields = element.getEnclosedElements()
-                .stream().filter(e -> FIELD.equals(e.getKind())).toList();
+                .stream().filter(e -> FIELD.name().equals(e.getKind().name())).toList();
 
-        System.out.println("Executing///");
         try (PrintWriter writer = new PrintWriter(
                 filer.createSourceFile(builderFullName).openWriter())) {
             writer.println("""
@@ -75,7 +74,7 @@ public class BuilderProcessor extends AbstractProcessor {
                             %s = value;
                             return this;
                         }
-                    """.formatted(builderName, field.getSimpleName(),
+                    """.formatted(builderName, "set" + makeCamelCase(field.getSimpleName().toString()),
                     field.asType().toString(), field.getSimpleName())));
 
             writer.println("""
@@ -89,5 +88,9 @@ public class BuilderProcessor extends AbstractProcessor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String makeCamelCase(String value) {
+        return value.substring(0, 1).toUpperCase() + value.substring(1);
     }
 }
